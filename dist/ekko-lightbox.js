@@ -120,10 +120,16 @@ var Lightbox = (function ($) {
 			this._padding = this._calculatePadding();
 
 			this._galleryName = this._$element.data('gallery');
+			let ekko = this;
 			if (this._galleryName) {
 				this._$galleryItems = $(document.body).find('*[data-gallery="' + this._galleryName + '"]');
 				this._galleryIndex = this._$galleryItems.index(this._$element);
-				$(document).on('keydown.ekkoLightbox', this._navigationalBinder.bind(this));
+				//$(document).on('keydown.ekkoLightbox', this._navigationalBinder.bind(this));
+				this._navigationalBinder.bind(this);
+				$(document).on('keydown.ekkoLightbox', function(e) {
+					//ekko._navigationalBinder.bind(ekko);
+					ekko._navigationalBinder(e);
+				});
 
 				// add the directional arrows to the modal
 				if (this._config.showArrows && this._$galleryItems.length > 1) {
@@ -141,7 +147,11 @@ var Lightbox = (function ($) {
 				}
 			}
 
-			this._$modal.on('show.bs.modal', this._config.onShow.bind(this)).on('shown.bs.modal', function () {
+			this._$modal.on('show.bs.modal', function() {
+				ekko._config.onShow.bind(ekko);
+			});
+			//this._$modal.on('show.bs.modal', this._config.onShow.bind(this));
+			this._$modal.on('shown.bs.modal', function () {
 				_this._toggleLoading(true);
 				_this._handle();
 				return _this._config.onShown.call(_this);
@@ -152,7 +162,14 @@ var Lightbox = (function ($) {
 				}
 				_this._$modal.remove();
 				return _this._config.onHidden.call(_this);
-			}).modal(this._config);
+			});
+
+			//this._$modal.modal(this._config);
+			this._$modal.find('.close').on('click', () => {
+				this._$modal.modal('hide');
+			});
+			//this._$modal.modal(this._config)
+			this._$modal.modal('show');
 
 			$(window).on('resize.ekkoLightbox', function () {
 				_this._resize(_this._wantedWidth, _this._wantedHeight);

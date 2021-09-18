@@ -104,10 +104,17 @@ const Lightbox = (($) => {
 			this._padding = this._calculatePadding()
 
 			this._galleryName = this._$element.data('gallery')
+
+			let ekko = this;
 			if (this._galleryName) {
 				this._$galleryItems = $(document.body).find(`*[data-gallery="${this._galleryName}"]`)
 				this._galleryIndex = this._$galleryItems.index(this._$element)
-				$(document).on('keydown.ekkoLightbox', this._navigationalBinder.bind(this))
+				this._navigationalBinder.bind(this);
+
+				$(document).on('keydown.ekkoLightbox', function(e) {
+					//ekko._navigationalBinder.bind(ekko);
+					ekko._navigationalBinder(e);
+				})
 
 				// add the directional arrows to the modal
 				if (this._config.showArrows && this._$galleryItems.length > 1) {
@@ -125,23 +132,31 @@ const Lightbox = (($) => {
 				}
 			}
 
-			this._$modal
-			.on('show.bs.modal', this._config.onShow.bind(this))
-			.on('shown.bs.modal', () => {
+			this._$modal.on('show.bs.modal', function() {
+				ekko._config.onShow.bind(ekko);
+			});
+			this._$modal.on('shown.bs.modal', () => {
 				this._toggleLoading(true)
 				this._handle()
 				return this._config.onShown.call(this)
-			})
-			.on('hide.bs.modal', this._config.onHide.bind(this))
-			.on('hidden.bs.modal', () => {
+			});
+
+			this._$modal.on('hide.bs.modal', this._config.onHide.bind(this));
+			this._$modal.on('hidden.bs.modal', () => {
 				if (this._galleryName) {
 					$(document).off('keydown.ekkoLightbox')
 					$(window).off('resize.ekkoLightbox')
 				}
 				this._$modal.remove()
 				return this._config.onHidden.call(this)
-			})
-			.modal(this._config)
+			});
+
+			this._$modal.find('.close').on('click', () => {
+				this._$modal.modal('hide');
+			});
+
+			//this._$modal.modal(this._config)
+			this._$modal.modal('show');
 
 			$(window).on('resize.ekkoLightbox', () => {
 				this._resize(this._wantedWidth, this._wantedHeight)
